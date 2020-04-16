@@ -29,7 +29,7 @@ public:
 
     HTMLTextLine * get_cur_line(void) const { return cur_line; }
 
-    void dump_text(std::ostream & out);
+    void dump_text(std::ostream & out, std::ostream & out_json);
     void dump_css(std::ostream & out);
     void clear(void);
 

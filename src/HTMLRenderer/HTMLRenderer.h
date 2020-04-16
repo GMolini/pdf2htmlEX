@@ -369,9 +369,12 @@ protected:
     struct {
         std::ofstream fs;
         std::string path;
-    } f_outline, f_pages, f_css;
+    } f_outline, f_pages, f_css, f_json_pages;
     std::ofstream * f_curpage;
+    std::ofstream * f_json_curpage;
+
     std::string cur_page_filename;
+    std::string cur_page_json_filename;
 
     static const std::string MANIFEST_FILENAME;
 

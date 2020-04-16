@@ -23,3 +23,5 @@ Testing/*
 DartConfiguration.tcl
 test/test.py
 *.swp
+
+.vscode/

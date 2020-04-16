@@ -160,6 +160,8 @@ void parse_options (int argc, char **argv)
         .add("printing", &param.printing, 1, "enable printing support")
         .add("fallback", &param.fallback, 0, "output in fallback mode")
         .add("tmp-file-size-limit", &param.tmp_file_size_limit, -1, "Maximum size (in KB) used by temporary files, -1 for no limit")
+        .add("json-output", &param.json_output, 0, "export text in divs in a json file")
+        .add("json-filename", &param.json_filename, "", "filename template for split pages json ")
 
         // fonts
         .add("embed-external-font", &param.embed_external_font, 1, "embed local match for external fonts")
@@ -270,7 +272,6 @@ void check_param()
         }
         sanitize_filename(param.page_filename);
     }
-
     else
     {
         // Need to make sure we have a page number placeholder in the filename
@@ -282,6 +283,44 @@ void check_param()
             sanitize_filename(param.page_filename);
         }
     }
+
+    if(param.json_filename.empty())
+    {
+        if (param.split_pages) {
+            const string s = get_filename(param.input_filename);
+            if(get_suffix(param.input_filename) == ".pdf")
+            {
+                param.json_filename = s.substr(0, s.size() - 4) + "%d.page.json";
+            }
+            else
+            {
+                param.json_filename = s + "%d.page.json";
+            }
+            sanitize_filename(param.json_filename);
+        } else {
+            const string s = get_filename(param.input_filename);
+            if(get_suffix(param.input_filename) == ".pdf")
+            {
+                param.json_filename = s.substr(0, s.size() - 4) + ".json";
+            }
+            else
+            {
+                param.json_filename = s + ".json";
+            }
+        }
+    }
+    else
+    {
+        // Need to make sure we have a page number placeholder in the filename
+        if(!sanitize_filename(param.json_filename))
+        {
+            // Inject the placeholder just before the file extension
+            const string suffix = get_suffix(param.json_filename);
+            param.json_filename = param.json_filename.substr(0, param.json_filename.size() - suffix.size()) + "%d" + suffix;
+            sanitize_filename(param.json_filename);
+        }
+    }
+
     if(param.css_filename.empty())
     {
         const string s = get_filename(param.input_filename);

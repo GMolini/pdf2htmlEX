@@ -27,8 +27,11 @@ HTMLTextPage::~HTMLTextPage()
         delete p;
 }
 
-void HTMLTextPage::dump_text(ostream & out)
+void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
 {
+    out_json << "{ \"divs\":[";
+
+    int counter = 0;
     if(param.optimize_text)
     {
         // text lines may be split during optimization, collect them
@@ -76,7 +79,10 @@ void HTMLTextPage::dump_text(ostream & out)
                 {
                     (*text_line_iter)->clip(cs);
                 }
-                (*text_line_iter)->dump_text(out);
+                //cerr << "Process div?";
+
+                (*text_line_iter)->dump_text(out, out_json, counter);
+                counter += 1;
                 ++text_line_iter;
             }
             if(has_clip)
@@ -92,6 +98,9 @@ void HTMLTextPage::dump_text(ostream & out)
                     && equal(page_width, cs.xmax) && equal(page_height, cs.ymax));
         }
     }
+
+    out_json << "]}";
+
 }
 
 void HTMLTextPage::dump_css(ostream & out)

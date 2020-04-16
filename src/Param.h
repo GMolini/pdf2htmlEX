@@ -47,6 +47,9 @@ struct Param
     int fallback;
     int tmp_file_size_limit;
 
+    int json_output;
+    std::string json_filename;
+
     // fonts
     int embed_external_font;
     std::string font_format;

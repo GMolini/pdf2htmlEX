@@ -150,6 +150,18 @@ void HTMLRenderer::process(PDFDoc *doc)
             set_stream_flags((*f_curpage));
 
             cur_page_filename = filled_template_filename;
+
+            // Do the same for the jsons, if processing json is
+            if (param.json_output == 1) {
+                string filled_template_json_filename = (char*)str_fmt(param.json_filename.c_str(), i);
+                auto page_fn = str_fmt("%s/%s", param.dest_dir.c_str(), filled_template_json_filename.c_str());
+                f_json_curpage = new ofstream((char*)page_fn, ofstream::binary);
+                if(!(*f_json_curpage))
+                    throw string("Cannot open ") + (char*)page_fn + " for writing";
+                set_stream_flags((*f_json_curpage));
+
+                cur_page_json_filename = filled_template_json_filename;
+            }
         }
 
         doc->displayPage(this, i,
@@ -168,6 +180,9 @@ void HTMLRenderer::process(PDFDoc *doc)
         {
             delete f_curpage;
             f_curpage = nullptr;
+
+            delete f_json_curpage;
+            f_json_curpage = nullptr;
         }
     }
     if(page_count >= 0 && param.quiet == 0)
@@ -197,6 +212,9 @@ void HTMLRenderer::setDefaultCTM(const double *ctm)
 
 void HTMLRenderer::startPage(int pageNum, GfxState *state, XRef * xref)
 {
+    if (param.json_output && pageNum > 1) {
+        (*f_json_curpage) << ",";
+    }
     covered_text_detector.reset();
     tracer.reset(state);
 
@@ -255,7 +273,7 @@ void HTMLRenderer::endPage() {
     }
 
     // dump all text
-    html_text_page.dump_text(*f_curpage);
+    html_text_page.dump_text(*f_curpage, *f_json_curpage);
     html_text_page.dump_css(f_css.fs);
     html_text_page.clear();
 
@@ -391,13 +409,28 @@ void HTMLRenderer::pre_process(PDFDoc * doc)
         set_stream_flags(f_pages.fs);
     }
 
+    {
+        auto fn = str_fmt("%s/__pages.json", param.tmp_dir.c_str());
+        tmp_files.add((char*)fn);
+
+        f_json_pages.path = (char*)fn;
+        f_json_pages.fs.open(f_json_pages.path, ofstream::binary);
+        if(!f_json_pages.fs)
+            throw string("Cannot open ") + (char*)fn + " for writing";
+        set_stream_flags(f_json_pages.fs);
+    }
+    
     if(param.split_pages)
     {
         f_curpage = nullptr;
+        f_json_curpage = nullptr;
     }
     else
     {
         f_curpage = &f_pages.fs;
+        f_json_curpage = &f_json_pages.fs;
+
+        (*f_json_curpage) << "{ \"pages\":[";
     }
 }
 
@@ -412,6 +445,27 @@ void HTMLRenderer::post_process(void)
     }
     f_pages.fs.close();
     f_css.fs.close();
+    f_json_pages.fs.close();
+
+    // build now the json file if json_option on and split-pages off
+    ofstream json_output;
+    if (param.json_output && !param.split_pages){
+        auto fn = str_fmt("%s/%s", param.dest_dir.c_str(), param.json_filename.c_str());
+        json_output.open((char*)fn, ofstream::binary);
+        if(!json_output)
+            throw string("Cannot open ") + (char*)fn + " for writing";
+        set_stream_flags(json_output);
+
+        ifstream fin(f_json_pages.path, ifstream::binary);
+        if(!fin)
+            throw "Cannot open pages for reading";
+        json_output << fin.rdbuf();
+        json_output.clear(); // output will set fail bit if fin is empty
+
+        if (param.json_output ) {
+            json_output << "]}";
+        }
+    }
 
     // build the main HTML file
     ofstream output;
@@ -507,6 +561,7 @@ void HTMLRenderer::post_process(void)
 
         cerr << "Warning: unknown line in manifest: " << line << endl;
     }
+
 }
 
 void HTMLRenderer::set_stream_flags(std::ostream & out)
@@ -530,6 +585,7 @@ void HTMLRenderer::dump_css (void)
     all_manager.height          .dump_css(f_css.fs);
     all_manager.width           .dump_css(f_css.fs);
     all_manager.left            .dump_css(f_css.fs);
+
     all_manager.bgimage_size    .dump_css(f_css.fs);
 
     // print css

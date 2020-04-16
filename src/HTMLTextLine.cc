@@ -13,7 +13,6 @@
 
 #include "util/encoding.h"
 #include "util/css_const.h"
-
 namespace pdf2htmlEX {
 
 using std::min;
@@ -137,7 +136,7 @@ void HTMLTextLine::dump_chars(ostream & out, int begin, int len)
         out << "</span>";
 }
 
-void HTMLTextLine::dump_text(ostream & out)
+void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
 {
     /*
      * Each Line is an independent absolute positioned block
@@ -151,6 +150,12 @@ void HTMLTextLine::dump_text(ostream & out)
         cerr << "Warning: text without a style! Must be a bug in pdf2htmlEX" << endl;
         return;
     }
+
+    if (counter > 0) {
+        out_json << ",";
+    }
+    out_json << "{ \"x\":\"" << line_state.x - clip_x1 << "\",\"y\":\"" << line_state.y - clip_y1 << "\"" << ",\"counter\":\"" << counter << "\"";
+    out_json << ",\"text\":\"";
 
     // Start Output
     {
@@ -288,6 +293,10 @@ void HTMLTextLine::dump_text(ostream & out)
                 if((cur_offset_iter != offsets.end()) && (cur_offset_iter->start_idx) < next_text_idx)
                     next_text_idx = cur_offset_iter->start_idx;
                 dump_chars(out, cur_text_idx, next_text_idx - cur_text_idx);
+
+
+                dump_chars(out_json, cur_text_idx, next_text_idx - cur_text_idx);
+
                 cur_text_idx = next_text_idx;
             }
         }
@@ -299,6 +308,7 @@ void HTMLTextLine::dump_text(ostream & out)
         stack.back()->end(out);
         stack.pop_back();
     }
+    out_json << "\"}" << std::endl;
 
     out << "</div>";
 }
