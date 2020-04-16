@@ -151,11 +151,13 @@ void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
         return;
     }
 
-    if (counter > 0) {
-        out_json << ",";
+    if (param.json_output) {
+        if (counter > 0) {
+            out_json << ",";
+        }
+        out_json << "{ \"x\":\"" << line_state.x - clip_x1 << "\",\"y\":\"" << line_state.y - clip_y1 << "\"" << ",\"counter\":\"" << counter << "\"";
+        out_json << ",\"text\":\"";
     }
-    out_json << "{ \"x\":\"" << line_state.x - clip_x1 << "\",\"y\":\"" << line_state.y - clip_y1 << "\"" << ",\"counter\":\"" << counter << "\"";
-    out_json << ",\"text\":\"";
 
     // Start Output
     {
@@ -294,8 +296,9 @@ void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
                     next_text_idx = cur_offset_iter->start_idx;
                 dump_chars(out, cur_text_idx, next_text_idx - cur_text_idx);
 
-
-                dump_chars(out_json, cur_text_idx, next_text_idx - cur_text_idx);
+                if (param.json_output) {
+                    dump_chars(out_json, cur_text_idx, next_text_idx - cur_text_idx);
+                }
 
                 cur_text_idx = next_text_idx;
             }
@@ -308,7 +311,9 @@ void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
         stack.back()->end(out);
         stack.pop_back();
     }
-    out_json << "\"}" << std::endl;
+    if (param.json_output) {
+        out_json << "\"}" << std::endl;
+    }
 
     out << "</div>";
 }

@@ -29,7 +29,9 @@ HTMLTextPage::~HTMLTextPage()
 
 void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
 {
-    out_json << "{ \"divs\":[";
+    if (param.json_output) {
+        out_json << "{ \"divs\":[";
+    }
 
     int counter = 0;
     if(param.optimize_text)
@@ -79,7 +81,6 @@ void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
                 {
                     (*text_line_iter)->clip(cs);
                 }
-                //cerr << "Process div?";
 
                 (*text_line_iter)->dump_text(out, out_json, counter);
                 counter += 1;
@@ -98,8 +99,9 @@ void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
                     && equal(page_width, cs.xmax) && equal(page_height, cs.ymax));
         }
     }
-
-    out_json << "]}";
+    if (param.json_output) {
+        out_json << "]}";
+    }
 
 }
 

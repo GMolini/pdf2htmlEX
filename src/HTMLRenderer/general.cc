@@ -150,9 +150,9 @@ void HTMLRenderer::process(PDFDoc *doc)
             set_stream_flags((*f_curpage));
 
             cur_page_filename = filled_template_filename;
-
+        
             // Do the same for the jsons, if processing json is
-            if (param.json_output == 1) {
+            if (param.json_output) {
                 string filled_template_json_filename = (char*)str_fmt(param.json_filename.c_str(), i);
                 auto page_fn = str_fmt("%s/%s", param.dest_dir.c_str(), filled_template_json_filename.c_str());
                 f_json_curpage = new ofstream((char*)page_fn, ofstream::binary);
@@ -181,8 +181,10 @@ void HTMLRenderer::process(PDFDoc *doc)
             delete f_curpage;
             f_curpage = nullptr;
 
-            delete f_json_curpage;
-            f_json_curpage = nullptr;
+            if (param.json_output) {
+                delete f_json_curpage;
+                f_json_curpage = nullptr;
+            }
         }
     }
     if(page_count >= 0 && param.quiet == 0)
@@ -273,7 +275,9 @@ void HTMLRenderer::endPage() {
     }
 
     // dump all text
+
     html_text_page.dump_text(*f_curpage, *f_json_curpage);
+
     html_text_page.dump_css(f_css.fs);
     html_text_page.clear();
 
@@ -430,7 +434,9 @@ void HTMLRenderer::pre_process(PDFDoc * doc)
         f_curpage = &f_pages.fs;
         f_json_curpage = &f_json_pages.fs;
 
-        (*f_json_curpage) << "{ \"pages\":[";
+        if (param.json_output) {
+            (*f_json_curpage) << "{ \"pages\":[";
+        }
     }
 }
 
