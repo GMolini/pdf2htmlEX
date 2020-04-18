@@ -107,6 +107,7 @@ private:
      */
     void dump_chars(std::ostream & out, int begin, int len);
     void dump_char(std::ostream & out, int pos);
+    void dump_chars_json(std::ostream & out, int begin, int len);
 
     const Param & param;
     AllStateManager & all_manager;

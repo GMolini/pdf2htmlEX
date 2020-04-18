@@ -136,6 +136,41 @@ void HTMLTextLine::dump_chars(ostream & out, int begin, int len)
         out << "</span>";
 }
 
+void HTMLTextLine::dump_chars_json(ostream & out, int begin, int len)
+{
+    //Removed writing spans as Im only interested in the text
+
+    static const Color transparent(0, 0, 0, true);
+
+    if (line_state.first_char_index < 0)
+    {
+        for (int i = 0; i < len; i++)
+            dump_char(out, begin + i);
+        return;
+    }
+
+    bool invisible_group_open = false;
+    for(int i = 0; i < len; i++)
+    {
+        if (!line_state.is_char_covered(line_state.first_char_index + begin + i)) //visible
+        {
+            if (invisible_group_open)
+            {
+                invisible_group_open = false;
+            }
+            dump_char(out, begin + i);
+        }
+        else
+        {
+            if (!invisible_group_open)
+            {
+                invisible_group_open = true;
+            }
+            dump_char(out, begin + i);
+        }
+    }
+}
+
 void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
 {
     /*
@@ -155,7 +190,7 @@ void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
         if (counter > 0) {
             out_json << ",";
         }
-        out_json << "{ \"x\":\"" << line_state.x - clip_x1 << "\",\"y\":\"" << line_state.y - clip_y1 << "\"" << ",\"counter\":\"" << counter << "\"";
+        out_json << "{ \"x\":" << line_state.x - clip_x1 << ",\"y\":" << line_state.y - clip_y1 << ",\"counter\":\"" << counter << "\"";
         out_json << ",\"text\":\"";
     }
 
@@ -297,7 +332,7 @@ void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
                 dump_chars(out, cur_text_idx, next_text_idx - cur_text_idx);
 
                 if (param.json_output) {
-                    dump_chars(out_json, cur_text_idx, next_text_idx - cur_text_idx);
+                    dump_chars_json(out_json, cur_text_idx, next_text_idx - cur_text_idx);
                 }
 
                 cur_text_idx = next_text_idx;

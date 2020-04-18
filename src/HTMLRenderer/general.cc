@@ -214,8 +214,11 @@ void HTMLRenderer::setDefaultCTM(const double *ctm)
 
 void HTMLRenderer::startPage(int pageNum, GfxState *state, XRef * xref)
 {
-    if (param.json_output && pageNum > 1) {
-        (*f_json_curpage) << ",";
+    if (param.json_output) {
+        if (!param.split_pages && pageNum > 1) {
+            (*f_json_curpage) << ",";
+        }
+        (*f_json_curpage) << "{\"page_num\":\""<< pageNum << "\",\"divs\":[";
     }
     covered_text_detector.reset();
     tracer.reset(state);
@@ -315,6 +318,12 @@ void HTMLRenderer::endPage() {
     if(param.split_pages)
     {
         f_pages.fs << "</div>" << endl;
+    }
+
+    //close json page
+
+    if (param.json_output) {
+        (*f_json_curpage) << "]}";
     }
 }
 

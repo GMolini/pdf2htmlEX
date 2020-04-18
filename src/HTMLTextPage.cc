@@ -29,9 +29,6 @@ HTMLTextPage::~HTMLTextPage()
 
 void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
 {
-    if (param.json_output) {
-        out_json << "{ \"divs\":[";
-    }
 
     int counter = 0;
     if(param.optimize_text)
@@ -99,10 +96,6 @@ void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
                     && equal(page_width, cs.xmax) && equal(page_height, cs.ymax));
         }
     }
-    if (param.json_output) {
-        out_json << "]}";
-    }
-
 }
 
 void HTMLTextPage::dump_css(ostream & out)

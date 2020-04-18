@@ -290,11 +290,11 @@ void check_param()
             const string s = get_filename(param.input_filename);
             if(get_suffix(param.input_filename) == ".pdf")
             {
-                param.json_filename = s.substr(0, s.size() - 4) + "%d.page.json";
+                param.json_filename = s.substr(0, s.size() - 4) + "%d.json";
             }
             else
             {
-                param.json_filename = s + "%d.page.json";
+                param.json_filename = s + "%d.json";
             }
             sanitize_filename(param.json_filename);
         } else {
