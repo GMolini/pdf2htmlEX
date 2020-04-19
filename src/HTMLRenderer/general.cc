@@ -279,7 +279,7 @@ void HTMLRenderer::endPage() {
 
     // dump all text
 
-    html_text_page.dump_text(*f_curpage, *f_json_curpage);
+    html_text_page.dump_text(*f_curpage, *f_json_curpage, this->pageNum);
 
     html_text_page.dump_css(f_css.fs);
     html_text_page.clear();

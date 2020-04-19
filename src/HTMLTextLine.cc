@@ -171,7 +171,10 @@ void HTMLTextLine::dump_chars_json(ostream & out, int begin, int len)
     }
 }
 
-void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
+void HTMLTextLine::dump_text(ostream & out, 
+                             ostream & out_json, 
+                             int pageNum,
+                             int counter)
 {
     /*
      * Each Line is an independent absolute positioned block
@@ -190,14 +193,16 @@ void HTMLTextLine::dump_text(ostream & out, ostream & out_json, int counter)
         if (counter > 0) {
             out_json << ",";
         }
-        out_json << "{ \"x\":" << line_state.x - clip_x1 << ",\"y\":" << line_state.y - clip_y1 << ",\"counter\":\"" << counter << "\"";
+        out_json << "{ \"x\":" << line_state.x - clip_x1 
+                 << ",\"y\":" << line_state.y - clip_y1 
+                 << ",\"id\":\"" << pageNum << "_" << counter << "\"";
         out_json << ",\"text\":\"";
     }
 
     // Start Output
     {
         // open <div> for the current text line
-        out << "<div class=\"" << CSS::LINE_CN
+        out << "<div data-id=\"" << pageNum << "_" << counter << "\" class=\"" << CSS::LINE_CN
             << " " << CSS::TRANSFORM_MATRIX_CN << all_manager.transform_matrix.install(line_state.transform_matrix)
             << " " << CSS::LEFT_CN             << all_manager.left.install(line_state.x - clip_x1)
             << " " << CSS::HEIGHT_CN           << all_manager.height.install(ascent)

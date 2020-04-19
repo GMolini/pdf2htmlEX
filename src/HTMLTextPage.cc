@@ -27,7 +27,9 @@ HTMLTextPage::~HTMLTextPage()
         delete p;
 }
 
-void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
+void HTMLTextPage::dump_text(ostream & out, 
+                             std::ostream & out_json,
+                             int pageNum)
 {
 
     int counter = 0;
@@ -79,7 +81,7 @@ void HTMLTextPage::dump_text(ostream & out, std::ostream & out_json)
                     (*text_line_iter)->clip(cs);
                 }
 
-                (*text_line_iter)->dump_text(out, out_json, counter);
+                (*text_line_iter)->dump_text(out, out_json, pageNum, counter);
                 counter += 1;
                 ++text_line_iter;
             }

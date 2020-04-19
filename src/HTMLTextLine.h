@@ -85,7 +85,10 @@ public:
     void append_padding_char() { text.push_back(0); }
     void append_offset(double width);
     void append_state(const HTMLTextState & text_state);
-    void dump_text(std::ostream & out, std::ostream & out_json, int counter);
+    void dump_text(std::ostream & out, 
+                   std::ostream & out_json, 
+                   int pageNum,
+                   int counter);
 
     bool text_empty(void) const { return text.empty(); }
     void clear(void);
