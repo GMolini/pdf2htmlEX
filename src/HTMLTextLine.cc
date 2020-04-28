@@ -157,6 +157,7 @@ void HTMLTextLine::dump_chars_json(ostream & out, int begin, int len)
             if (invisible_group_open)
             {
                 invisible_group_open = false;
+                out << ' '; // When we had a span, add an space
             }
             dump_char(out, begin + i);
         }
@@ -164,11 +165,15 @@ void HTMLTextLine::dump_chars_json(ostream & out, int begin, int len)
         {
             if (!invisible_group_open)
             {
+                out << ' '; // When we had a span, add an space
                 invisible_group_open = true;
             }
             dump_char(out, begin + i);
         }
     }
+    if (invisible_group_open)
+        out << " ";
+
 }
 
 void HTMLTextLine::dump_text(ostream & out, 
@@ -303,6 +308,10 @@ void HTMLTextLine::dump_text(ostream & out,
                             out << "</span>";
                             actual_offset = space_off;
                             done = true;
+
+                            if (param.json_output) {
+                                out_json << " ";
+                            }
                         }
                     }
 
@@ -320,6 +329,10 @@ void HTMLTextLine::dump_text(ostream & out,
 
                             out << "<span class=\"" << CSS::WHITESPACE_CN
                                 << ' ' << CSS::WHITESPACE_CN << wid << "\">" << (target > (threshold - EPS) ? " " : "") << "</span>";
+                            
+                            if (param.json_output) {
+                                out_json << " ";
+                            }
                         }
                     }
                 }
